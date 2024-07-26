@@ -15,10 +15,15 @@ router.get('/', async (req, res) => {
 });
 
 // Obtener una receta por ID
-router.get('/:id', async (req, res) => {
-    const { id } = req.params;
-    const recipe = await service.findOne(id);
-    res.status(200).json(recipe);
+router.get('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const recipe = await service.findOne(id);
+        res.status(200).json(recipe);
+    } catch (error) {
+        next(error)
+    }
+
 });
 
 // Crear receta
@@ -29,14 +34,14 @@ router.post('/', async (req, res) => {
 });
 
 // Actualización parcial
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
         const body = req.body;
         const recipe = await service.update(id, body);
         res.status(200).json(recipe)   
     } catch (error) {
-        res.status(404).json({message: error.message})
+        next(error);
     }
 
 });

@@ -1,6 +1,9 @@
 const express = require('express');
 const routerApi = require('./routes');
 
+// Importación Middlewares
+const { logErrors, errorHandler, boomErrorHandler } = require('./middlewares/error.handler')
+
 // Creación de instancia de express
 const app = express();
 
@@ -12,6 +15,11 @@ app.use(express.json());
 
 // Implementando el routerAPI
 routerApi(app)
+
+// Decirle a la aplicación que use los Middleware
+app.use(logErrors);
+app.use(boomErrorHandler);
+app.use(errorHandler);
 
 app.get('/', (req, res) => {
     res.send('Hello World');
