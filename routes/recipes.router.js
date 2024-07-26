@@ -1,65 +1,51 @@
 const express = require('express');
-const { faker } = require('@faker-js/faker');
+
+const RecipesService = require('./../services/recipes.service')
 
 // Crear Router propio
 const router = express.Router();
 
-// Obtener todas las recetas
-router.get('/', (req, res) => {
-    const recetas = [];
-    const { size } = req.query;
-    const limit = size || 10;
-    for (let index = 0; index < limit; index++) {
-        recetas.push({
-            name: faker.commerce.productName(),
-            description: faker.commerce.productDescription(),
-            image: faker.image.url()
-        });
-        
-    }
-    res.json(recetas);
-});
+// Crear instancia de RecipeService
+const service = new RecipesService();
 
-// Filtrar recetas
-router.get('/filter', (req, res) => {
-    res.send('I am a filter');
+// Obtener todas las recetas
+router.get('/', async (req, res) => {
+    const recipes = await service.find();
+    res.status(200).json(recipes);
 });
 
 // Obtener una receta por ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
-    res.json({
-        id
-    });
+    const recipe = await service.findOne(id);
+    res.status(200).json(recipe);
 });
 
 // Crear receta
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
     const body = req.body;
-    res.status(201).json({
-        message: 'Created',
-        data: body
-    });
+    const newRecipe = await service.create(body);
+    res.status(201).json(newRecipe);
 });
 
 // Actualización parcial
-router.patch('/:id', (req, res) => {
-    const { id } = req.params;
-    const body = req.body;
-    res.json({
-        message: 'Updated',
-        data: body,
-        id,
-    });
+router.patch('/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const body = req.body;
+        const recipe = await service.update(id, body);
+        res.status(200).json(recipe)   
+    } catch (error) {
+        res.status(404).json({message: error.message})
+    }
+
 });
 
 // Eliminar receta
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
     const { id } = req.params;
-    res.json({
-        message: 'Deleted',
-        id
-    });
+    const recipe = await service.delete(id);
+    res.status(200).json(recipe);
 });
 
 module.exports = router;
